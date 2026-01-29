@@ -1,0 +1,42 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Camera = workspace.CurrentCamera
+
+-- Configurações
+local HITBOX_TARGET_SIZE = Vector3.new(50, 50, 50) -- tamanho alvo da "hitbox"
+local AUTO_REVERT_TIME = 30 -- segundos até reverter automaticamente (após usar o botão aumentar); nil para desativar
+
+-- Estado
+local originalSizes = {} -- [userId] = Vector3 original HumanoidRootPart.Size
+local hitboxApplied = false
+local autoRevertTask = nil
+
+local aimAssistEnabled = false
+local aimConnection = nil
+local previousCameraState = {
+	CameraType = nil,
+	CameraSubject = nil
+}
+
+-- UTILIDADES
+local function isRealPlayer(player)
+	-- Se quiser filtrar bots ou NPCs, faça checagens aqui.
+	-- Por ora consideramos todos os Players reais fornecidos por Players:GetPlayers()
+	return true
+end
+
+local function getCharacterRootPart(player)
+	local char = player.Character
+	if not char then return nil end
+	return char:FindFirstChild("HumanoidRootPart")
+end
+
+local function storeOriginalSize(player, rootPart)
+	if not rootPart then return end
+	local id = player.UserId
+	if not originalSizes[id] then
+		originalSizes
